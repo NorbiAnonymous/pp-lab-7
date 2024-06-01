@@ -7,10 +7,11 @@ import java.io.File;
 public class Main extends JFrame {
     private JTextField directoryPathField;
     private JTextField searchField;
+    private JTextArea resultArea;
 
     public Main() {
         setTitle("File Browser and Search");
-        setSize(600, 200);
+        setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -21,6 +22,13 @@ public class Main extends JFrame {
         searchField = new JTextField();
         searchField.setColumns(20);
         searchField.setText("Enter search phrase");
+
+        resultArea = new JTextArea();
+        resultArea.setRows(10);
+        resultArea.setLineWrap(true);
+        resultArea.setWrapStyleWord(true);
+        JScrollPane scrollPane = new JScrollPane(resultArea);
+        scrollPane.setPreferredSize(new Dimension(580, 200));
 
         JButton browseButton = new JButton("Browse");
         browseButton.addActionListener(new ActionListener() {
@@ -42,6 +50,7 @@ public class Main extends JFrame {
         vBox.add(hBox);
         vBox.add(searchField);
         vBox.add(searchButton);
+        vBox.add(scrollPane);
 
         add(vBox, BorderLayout.CENTER);
     }

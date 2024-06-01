@@ -78,7 +78,7 @@ public class Main extends Application {
         if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
-                    searchInDirectory(file, results, searchPhrase); // Rekursywne przeszukiwanie podkatalogów
+                    searchInDirectory(file, results, searchPhrase); 
                 } else {
                     try {
                         if (containsPhrase(file, searchPhrase)) {

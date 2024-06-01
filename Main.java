@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
+import java.io.*;
 
 public class Main extends JFrame {
     private JTextField directoryPathField;
@@ -11,7 +11,7 @@ public class Main extends JFrame {
 
     public Main() {
         setTitle("File Browser and Search");
-        setSize(600, 400);
+        setSize(600, 400); // Ustawienie preferowanego rozmiaru okna
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -28,7 +28,7 @@ public class Main extends JFrame {
         resultArea.setLineWrap(true);
         resultArea.setWrapStyleWord(true);
         JScrollPane scrollPane = new JScrollPane(resultArea);
-        scrollPane.setPreferredSize(new Dimension(580, 200));
+        scrollPane.setPreferredSize(new Dimension(580, 200)); // Ustawienie preferowanej wysokości
 
         JButton browseButton = new JButton("Browse");
         browseButton.addActionListener(new ActionListener() {
@@ -56,7 +56,7 @@ public class Main extends JFrame {
         vBox.add(hBox);
         vBox.add(searchField);
         vBox.add(searchButton);
-        vBox.add(scrollPane);
+        vBox.add(scrollPane); // Dodanie resultArea do vBox
 
         add(vBox, BorderLayout.CENTER);
     }
@@ -86,23 +86,41 @@ public class Main extends JFrame {
         }
 
         StringBuilder results = new StringBuilder();
-        listFilesInDirectory(directory, results);
+        searchInDirectory(directory, results, searchField.getText());
         resultArea.setText(results.toString());
     }
 
-    private void listFilesInDirectory(File directory, StringBuilder results) {
+    private void searchInDirectory(File directory, StringBuilder results, String searchPhrase) {
         File[] files = directory.listFiles();
         if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
-                    listFilesInDirectory(file, results);
+                    searchInDirectory(file, results, searchPhrase); // Rekursywne przeszukiwanie podkatalogów
                 } else {
-                    if (file.getName().contains(searchField.getText())) {
-                        results.append(file.getAbsolutePath()).append("\n");
+                    try {
+                        if (containsPhrase(file, searchPhrase)) {
+                            results.append(file.getAbsolutePath()).append("\n");
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }
         }
+    }
+
+    private boolean containsPhrase(File file, String searchPhrase) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(searchPhrase)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            return false;
+        }
+        return false;
     }
 
     public static void main(String[] args) {

@@ -1,73 +1,56 @@
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.*;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 
-public class Main extends JFrame {
-    private JTextField directoryPathField;
-    private JTextField searchField;
-    private JTextArea resultArea;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
-    public Main() {
-        setTitle("File Browser and Search");
-        setSize(600, 400); // Ustawienie preferowanego rozmiaru okna
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+public class Main extends Application {
+    private TextField directoryPathField;
+    private TextField searchField;
+    private TextArea resultArea;
 
-        directoryPathField = new JTextField();
-        directoryPathField.setColumns(20);
-        directoryPathField.setText("Enter directory path");
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("File Browser and Search");
 
-        searchField = new JTextField();
-        searchField.setColumns(20);
-        searchField.setText("Enter search phrase");
+        directoryPathField = new TextField();
+        directoryPathField.setPromptText("Enter directory path");
 
-        resultArea = new JTextArea();
-        resultArea.setRows(10);
-        resultArea.setLineWrap(true);
-        resultArea.setWrapStyleWord(true);
-        JScrollPane scrollPane = new JScrollPane(resultArea);
-        scrollPane.setPreferredSize(new Dimension(580, 200)); // Ustawienie preferowanej wysokości
+        searchField = new TextField();
+        searchField.setPromptText("Enter search phrase");
 
-        JButton browseButton = new JButton("Browse");
-        browseButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                browseDirectory();
-            }
-        });
+        resultArea = new TextArea();
+        resultArea.setPrefHeight(400);
 
-        JButton searchButton = new JButton("Search");
-        searchButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                searchFiles();
-            }
-        });
+        Button browseButton = new Button("Browse");
+        browseButton.setOnAction(e -> browseDirectory());
 
-        JPanel hBox = new JPanel();
-        hBox.setLayout(new FlowLayout(FlowLayout.LEFT));
-        hBox.add(directoryPathField);
-        hBox.add(browseButton);
+        Button searchButton = new Button("Search");
+        searchButton.setOnAction(e -> searchFiles());
 
-        JPanel vBox = new JPanel();
-        vBox.setLayout(new BoxLayout(vBox, BoxLayout.Y_AXIS));
-        vBox.add(hBox);
-        vBox.add(searchField);
-        vBox.add(searchButton);
-        vBox.add(scrollPane); // Dodanie resultArea do vBox
+        HBox hBox = new HBox(10, directoryPathField, browseButton);
+        VBox vBox = new VBox(10, hBox, searchField, searchButton, resultArea);
 
-        add(vBox, BorderLayout.CENTER);
+        Scene scene = new Scene(vBox, 600, 400);
+
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
     private void browseDirectory() {
-        JFileChooser directoryChooser = new JFileChooser();
-        directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int option = directoryChooser.showOpenDialog(this);
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        File selectedDirectory = directoryChooser.showDialog(null);
 
-        if (option == JFileChooser.APPROVE_OPTION) {
-            File selectedDirectory = directoryChooser.getSelectedFile();
+        if (selectedDirectory != null) {
             directoryPathField.setText(selectedDirectory.getAbsolutePath());
         }
     }
@@ -95,21 +78,17 @@ public class Main extends JFrame {
         if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
-                    searchInDirectory(file, results, searchPhrase); // Rekursywne przeszukiwanie podkatalogów
+                    searchInDirectory(file, results, searchPhrase); 
                 } else {
-                    try {
-                        if (containsPhrase(file, searchPhrase)) {
-                            results.append(file.getAbsolutePath()).append("\n");
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if (containsPhrase(file, searchPhrase)) {
+                        results.append(file.getAbsolutePath()).append("\n");
                     }
                 }
             }
         }
     }
 
-    private boolean containsPhrase(File file, String searchPhrase) throws IOException {
+    private boolean containsPhrase(File file, String searchPhrase) {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -118,15 +97,12 @@ public class Main extends JFrame {
                 }
             }
         } catch (IOException e) {
-            return false;
+            e.printStackTrace();
         }
         return false;
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            Main main = new Main();
-            main.setVisible(true);
-        });
+        launch(args);
     }
 }

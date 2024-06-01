@@ -1,66 +1,51 @@
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 import java.io.File;
 
-public class Main extends JFrame {
-    private JTextField directoryPathField;
-    private JTextField searchField;
+public class Main extends Application {
+    private TextField directoryPathField;
+    private TextField searchField;
 
-    public Main() {
-        setTitle("File Browser and Search");
-        setSize(600, 200);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("File Browser and Search");
 
-        directoryPathField = new JTextField();
-        directoryPathField.setColumns(20);
-        directoryPathField.setText("Enter directory path");
+        directoryPathField = new TextField();
+        directoryPathField.setPromptText("Enter directory path");
 
-        searchField = new JTextField();
-        searchField.setColumns(20);
-        searchField.setText("Enter search phrase");
+        searchField = new TextField();
+        searchField.setPromptText("Enter search phrase");
 
-        JButton browseButton = new JButton("Browse");
-        browseButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                browseDirectory();
-            }
-        });
+        Button browseButton = new Button("Browse");
+        browseButton.setOnAction(e -> browseDirectory());
 
-        JButton searchButton = new JButton("Search");
+        Button searchButton = new Button("Search");
 
-        JPanel hBox = new JPanel();
-        hBox.setLayout(new FlowLayout(FlowLayout.LEFT));
-        hBox.add(directoryPathField);
-        hBox.add(browseButton);
+        HBox hBox = new HBox(10, directoryPathField, browseButton);
+        VBox vBox = new VBox(10, hBox, searchField, searchButton);
 
-        JPanel vBox = new JPanel();
-        vBox.setLayout(new BoxLayout(vBox, BoxLayout.Y_AXIS));
-        vBox.add(hBox);
-        vBox.add(searchField);
-        vBox.add(searchButton);
+        Scene scene = new Scene(vBox, 600, 200);
 
-        add(vBox, BorderLayout.CENTER);
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
     private void browseDirectory() {
-        JFileChooser directoryChooser = new JFileChooser();
-        directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int option = directoryChooser.showOpenDialog(this);
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        File selectedDirectory = directoryChooser.showDialog(null);
 
-        if (option == JFileChooser.APPROVE_OPTION) {
-            File selectedDirectory = directoryChooser.getSelectedFile();
+        if (selectedDirectory != null) {
             directoryPathField.setText(selectedDirectory.getAbsolutePath());
         }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            Main main = new Main();
-            main.setVisible(true);
-        });
+        launch(args);
     }
 }
